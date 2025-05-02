@@ -25,11 +25,11 @@ De forma siguiente, se implemento el mismo circuito en el programa Wokwi, en don
 #include <WiFi.h>
 #include "ThingSpeak.h"
 
-const char* ssid = "IPhone de Gabbo";         // 🔵 Tu red WiFi
-const char* password = "Saltarin.123";  // 🔵 Tu contraseña WiFi
+const char* ssid = "IPhone de Gabbo";
+const char* password = "Saltarin.123";
 
-unsigned long channelID = 2943302;  // 🔵 Tu Channel ID
-const char* writeAPIKey = "39SYLBJLOTYOW7MU";    // 🔵 Tu API Key
+unsigned long channelID = 2943302;  // 🔵 El Channel ID
+const char* writeAPIKey = "39SYLBJLOTYOW7MU";    // 🔵 El API Key
 
 WiFiClient client;
 
@@ -114,3 +114,27 @@ La función loop() se ejecuta continuamente. Primero, el ESP32 solicita datos al
 Después, el código evalúa si la temperatura supera los 30 °C. Si es así, enciende el LED conectado al pin 18 mediante digitalWrite(HIGH); de lo contrario, lo apaga con digitalWrite(LOW).
 
 Finalmente, se preparan los datos para enviarlos a ThingSpeak. ThingSpeak.setField() se usa para asignar el valor de temperatura al campo 1 y un valor binario (1 o 0) al campo 2 como señal de alerta si se ha superado el umbral. La función ThingSpeak.writeFields() se encarga de enviar los datos al canal correspondiente. Si la operación fue exitosa (código HTTP 200), se notifica por el monitor serial; si no, se informa el código de error. El delay(20000) al final de loop() asegura que los datos se envíen cada 20 segundos, cumpliendo con las restricciones de tiempo de ThingSpeak para cuentas gratuitas.
+
+## Roles, Actividades y Contribuciones de los Miembros del Equipo
+
+A continuación, se detallan los roles, actividades desarrolladas y principales contribuciones de cada uno de los integrantes del equipo en la solución alcanzada:
+
+---
+
+### 👤 Juan Manuel Deutsch Torrado  
+**Rol:** Desarrollador principal y Documentador<br><br>
+**Actividades:**  
+- Diseño y desarrollo del codigo en Thinkercad. 
+- Revisión del codigo al momento de quemar informacion en el Arduino Uno.
+- Plantamiento y creación del circuito físico.  
+
+---
+
+### 👤 Gabriel David Jiménez Mosquera  
+**Rol:** Documentador técnico y Desarrollador principal <br><br>
+**Actividades:**  
+- Diseño e implementación del codigo en Wokwi.  
+- Manejo y configuración del Arduino Uno y del ESP32.  
+- Plantamiento y creación del circuito físico.  
+  
+---
