@@ -21,78 +21,71 @@ Arduino Esclavo:
 De forma siguiente, se implemento el mismo circuito en el programa Wokwi, en donde si se puede utilizar un ESP32, esto es importante ya que al requerir guardar los datos en una representacion de tabla en ThingSpeak es necesario tener un modulo wifi, para poder conectarse mediante IOT a el programa ya mencionado. Dentro de este programa se tienen diferencias en el codigo, ya que el ESP32 necesita cambios en las importaciones, como se mostrara adelante, ademas de eso, se realizo una configuración con los modulos de wifi.h y thingspeak.h, esto para realizar la accion ya mencionada, de poner conectarse y enviar los datos a ThingSpeak. a continuacion se presenta el codigo actualizado del ESP32:
 
 ```
+#include <Wire.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
+#include "ThingSpeak.h"
 
-// Configuración WiFi
-const char* ssid = "SSID";
-const char* password = "CONTRASEÑA";
+const char* ssid = "IPhone de Gabbo";         // 🔵 Tu red WiFi
+const char* password = "Saltarin.123";  // 🔵 Tu contraseña WiFi
 
-// Configuración ThingSpeak
-unsigned long* channelID = "2943302"; 
-const char* writeAPIKey = "39SYLBJLOTYOW7MU"; 
+unsigned long channelID = 2943302;  // 🔵 Tu Channel ID
+const char* writeAPIKey = "39SYLBJLOTYOW7MU";    // 🔵 Tu API Key
 
-// Pines
-#define LED_PIN 18
-#define RXD2 21
-#define TXD2 22
+WiFiClient client;
 
-// Variables
-float temperatura = 0.0;
+const byte SLAVE_ADDRESS = 2; // Dirección I2C del esclavo
+float temperature;
+
+const int ledPin = 18; // Pin donde está conectado el LED
 
 void setup() {
   Serial.begin(115200);
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  Wire.begin(21, 22);   // SDA = 21, SCL = 22 en ESP32
+  pinMode(ledPin, OUTPUT);
 
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);
-
-  // Conexión WiFi
   WiFi.begin(ssid, password);
-  Serial.print("Conectando a WiFi...");
+  Serial.print("Connecting to WiFi...");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nConectado a WiFi");
+  Serial.println("\nConnected to WiFi.");
+
+  ThingSpeak.begin(client);
 }
 
 void loop() {
-  // Lectura desde Arduino esclavo
-  if (Serial2.available()) {
-    String data = Serial2.readStringUntil('\n');
-    temperatura = data.toFloat();
-    Serial.print("Temperatura recibida: ");
-    Serial.println(temperatura);
-
-    // Enviar a ThingSpeak
-    if (WiFi.status() == WL_CONNECTED) {
-      HTTPClient http;
-      String url = server + String("?api_key=") + apiKey + "&field1=" + String(temperatura);
-      
-      http.begin(url);
-      int httpCode = http.GET();
-      if (httpCode > 0) {
-        Serial.println("Datos enviados a ThingSpeak");
-      } else {
-        Serial.print("Error al enviar: ");
-        Serial.println(httpCode);
-      }
-      http.end();
-    } else {
-      Serial.println("WiFi desconectado, reconectando...");
-      WiFi.begin(ssid, password);
-    }
-
-    // Control del LED
-    if (temperatura > 30.0) {
-      digitalWrite(LED_PIN, HIGH);
-    } else {
-      digitalWrite(LED_PIN, LOW);
-    }
+  // Pedir temperatura al esclavo
+  Wire.requestFrom(SLAVE_ADDRESS, sizeof(temperature));
+  if (Wire.available() == sizeof(temperature)) {
+    Wire.readBytes((byte*)&temperature, sizeof(temperature));
   }
 
-  delay(15000);  // Delay para cumplir con el límite de 15s de ThingSpeak
+  Serial.print("Temperatura: ");
+  Serial.println(temperature);
+
+  // Controlar LED
+  if (temperature >= 30.0) {
+    digitalWrite(ledPin, HIGH);
+  } else {
+    digitalWrite(ledPin, LOW);
+  }
+
+  // Publicar en ThingSpeak
+  ThingSpeak.setField(1, temperature); // Temperatura
+  ThingSpeak.setField(2, (temperature >= 30.0) ? 1 : 0); // Alerta
+
+  int x = ThingSpeak.writeFields(channelID, writeAPIKey);
+
+
+  if (x == 200) {
+    Serial.println("Datos enviados a ThingSpeak exitosamente.");
+  } else {
+    Serial.print("Error enviando datos. Código HTTP: ");
+    Serial.println(x);
+  }
+
+  delay(20000); // Esperar mínimo 15 segundos (recomendado 20s)
 }
 ```
 
@@ -112,3 +105,12 @@ Esto es la forma que se tiene para conectarse al canal, el cual monitera las var
 
 ## Explicación del codigo
 
+En primer lugar, se incluyen tres librerías clave: Wire.h permite la comunicación I2C entre el ESP32 y otro microcontrolador (por ejemplo, un Arduino), WiFi.h se utiliza para conectar el ESP32 a una red Wi-Fi, y ThingSpeak.h proporciona funciones para enviar datos a la plataforma de IoT ThingSpeak. Luego, se definen las credenciales Wi-Fi y la información del canal de ThingSpeak (ID del canal y clave de escritura). También se declara la dirección I2C del dispositivo esclavo, una variable para almacenar la temperatura y el pin al que está conectado el LED de advertencia.
+
+En la función setup(), se inicializa la comunicación serial para monitorear la salida en el monitor serial. Luego, se configura la comunicación I2C del ESP32 usando Wire.begin(), especificando los pines SDA (GPIO 21) y SCL (GPIO 22). El pin del LED se establece como salida. A continuación, se establece la conexión Wi-Fi mediante WiFi.begin(). El ESP32 espera en un bucle hasta que se conecte exitosamente a la red. Una vez conectado, se inicializa la comunicación con ThingSpeak usando ThingSpeak.begin(), pasando como argumento el cliente Wi-Fi.
+
+La función loop() se ejecuta continuamente. Primero, el ESP32 solicita datos al esclavo mediante Wire.requestFrom(), solicitando el número de bytes equivalente a una variable tipo float. Luego, si los datos están disponibles, se leen y se almacenan en la variable temperature con Wire.readBytes(). Esta temperatura se imprime en el monitor serial para observación local.
+
+Después, el código evalúa si la temperatura supera los 30 °C. Si es así, enciende el LED conectado al pin 18 mediante digitalWrite(HIGH); de lo contrario, lo apaga con digitalWrite(LOW).
+
+Finalmente, se preparan los datos para enviarlos a ThingSpeak. ThingSpeak.setField() se usa para asignar el valor de temperatura al campo 1 y un valor binario (1 o 0) al campo 2 como señal de alerta si se ha superado el umbral. La función ThingSpeak.writeFields() se encarga de enviar los datos al canal correspondiente. Si la operación fue exitosa (código HTTP 200), se notifica por el monitor serial; si no, se informa el código de error. El delay(20000) al final de loop() asegura que los datos se envíen cada 20 segundos, cumpliendo con las restricciones de tiempo de ThingSpeak para cuentas gratuitas.
