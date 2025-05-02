@@ -33,7 +33,7 @@ const char* writeAPIKey = "39SYLBJLOTYOW7MU";    // 🔵 Tu API Key
 
 WiFiClient client;
 
-const byte SLAVE_ADDRESS = 2; // Dirección I2C del esclavo
+const byte SLAVE_ADDRESS = 1; // Dirección I2C del esclavo
 float temperature;
 
 const int ledPin = 18; // Pin donde está conectado el LED
