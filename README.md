@@ -125,6 +125,8 @@ Por otro lado, el error EXIT STATUS 1 persistió a pesar de múltiples intentos 
 
 Como consecuencia, no se logró llevar a cabo la demostración final de la implementación física.
 
+Por otro lado, la implementación utilizando Arduino se realizó de manera satisfactoria. El proceso de carga del código al dispositivo no presentó ningún tipo de inconveniente, manteniéndose sin modificaciones el código previamente mostrado.
+
 ![Imagen_3](Imagenes/Montaje.jpg)
 
 ## Roles, Actividades y Contribuciones de los Miembros del Equipo
