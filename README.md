@@ -115,6 +115,16 @@ Después, el código evalúa si la temperatura supera los 30 °C. Si es así, 
 
 Finalmente, se preparan los datos para enviarlos a ThingSpeak. ThingSpeak.setField() se usa para asignar el valor de temperatura al campo 1 y un valor binario (1 o 0) al campo 2 como señal de alerta si se ha superado el umbral. La función ThingSpeak.writeFields() se encarga de enviar los datos al canal correspondiente. Si la operación fue exitosa (código HTTP 200), se notifica por el monitor serial; si no, se informa el código de error. El delay(20000) al final de loop() asegura que los datos se envíen cada 20 segundos, cumpliendo con las restricciones de tiempo de ThingSpeak para cuentas gratuitas.
 
+## Implementación Fisica
+
+Durante la fase de implementación física se presentaron inconvenientes específicamente al momento de cargar el código al microcontrolador ESP32. Se identificaron dos errores principales: EXIT STATUS 2 y EXIT STATUS 1.
+
+El error EXIT STATUS 2 fue resuelto ajustando la velocidad de carga hacia el dispositivo, lo cual permitió reducir la sobrecarga de datos durante el proceso de subida del programa.
+
+Por otro lado, el error EXIT STATUS 1 persistió a pesar de múltiples intentos de solución. Según la documentación oficial y la experiencia de otros usuarios, este error suele estar relacionado con conflictos de librerías o problemas de compatibilidad entre versiones del entorno de desarrollo (IDE) de Arduino y el ESP32. Se realizaron diversos ajustes y pruebas en relación con las posibles causas identificadas, sin embargo, no fue posible cargar exitosamente el código al dispositivo.
+
+Como consecuencia, no se logró llevar a cabo la demostración final de la implementación física.
+
 ## Roles, Actividades y Contribuciones de los Miembros del Equipo
 
 A continuación, se detallan los roles, actividades desarrolladas y principales contribuciones de cada uno de los integrantes del equipo en la solución alcanzada:
