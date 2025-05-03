@@ -125,6 +125,8 @@ Por otro lado, el error EXIT STATUS 1 persistió a pesar de múltiples intentos 
 
 Como consecuencia, no se logró llevar a cabo la demostración final de la implementación física.
 
+![Imagen_3](Imagenes/Montaje.jpg)
+
 ## Roles, Actividades y Contribuciones de los Miembros del Equipo
 
 A continuación, se detallan los roles, actividades desarrolladas y principales contribuciones de cada uno de los integrantes del equipo en la solución alcanzada:
